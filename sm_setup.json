@@ -1,0 +1,9 @@
+{
+	"sm_setup": {
+		"conv_matrix": {
+			"water": {},
+			"gas": {},
+			"electricity": {}
+		}
+	}
+}
