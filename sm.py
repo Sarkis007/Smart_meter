@@ -16,15 +16,14 @@ def load_sm_data():
             return sm_data
     except:
         file = open('sm_data.json', "w")
-        file.write('{"home":{ "water": { "date": {}, "read": {} }, "gas": { "date": {}, "read": {} }, '
-                   '"electricity": { "date": {}, "read": {} } }}')
+        file.write('{"home":{"water": {}, "gas": {},"electricity":{}}}')
         file.close()
         with open('sm_data.json') as data_file:
             sm_data = json.load(data_file)
             return sm_data
 
 
-def validate():
+def date_input():
     now = datetime.datetime.now()
     date = raw_input("please insert the date as 'yyyy-mm-dd' or just type 'today' ")
     if date == 'today':
@@ -35,54 +34,46 @@ def validate():
             datetime.datetime.strptime(date, '%Y-%m-%d')
             return date
         except:
-            x = validate()
+            x = date_input()
             return x
 
 
-def operation():
+def operation(sm_data):
+    print "Welcome to Smart Meter"
+    print "please select one of the following operations"
     while True:
-        try:
-            print "1- add a new measurement"
-            print "2- check your usage"
-            x = input("please select one of the operations above, enter 1 or 2 or 3")
-            if x == 1:
-                print "" #1add_measurements()
-                while True:
-                    try:
-                        print ("Do you want to do other operations ?")
-                        print ("Please enter 'y' for yes and 'n' for no")
-                        repeat = raw_input()
-                        if repeat == 'y':
-                            operation()
-                        elif repeat == 'n':
-                            print "Thank you"
-                            print "Have a nice day"
-                            break  # BUG not breaking two whiles
-                        else:
-                            print "invalid input please select 'y' or 'n'"
-                    except:
-                        print "invalid input please select 'y' for yes and 'n' for no"
-                break
-            elif x == 2:
-                print ""
-            else:
-                print "invalid input"
-        except:
-            print "invalid input"
+        print "1- add a new measurement"
+        print "2- check your usage"
+        print "3- exit"
+        x = raw_input()
+        if x == '1':
+            add_measurements(sm_data)
+            print "please choose other operation or enter 3 to exit"
+        elif x == '2':
+            print ""
+        elif x == '3':
+            print "Thank you"
+            print "Have a nice day"
+            break
+        else:
+            print "invalid input, please enter 1 or 2 or 3"
 
 
-
-def add_measurements():
+def add_measurements(sm_data):
     print "please select the utility measurement you want to add"
     while True:
         utility = raw_input("'gas' 'water' or 'electricity'")
         if utility == 'gas' or utility == 'water' or utility == 'electricity':
-            date = validate()
+            date = date_input()
+            new_measurement = {"home": {utility: {date: {"read": {}}}}}
             while True:
                 try:
                     while True:
                         read = input('please enter meter read for '+str(utility)+" on "+str(date))
                         if len(str(read)) == 5:
+                            new_measurement["home"][utility][date]["read"] = read
+                            print new_measurement
+                            save_measurements(new_measurement, utility, sm_data, date)
                             print "measurement added successfully"
                             return utility, date, read
                         else:
@@ -93,11 +84,18 @@ def add_measurements():
             print "please select 'gas' 'water' or 'electricity'"
 
 
+def save_measurements(new_measurement, utility, sm_data, date):
+    sm_data["home"][utility][date] = new_measurement["home"][utility][date]
+    file = open("sm_data.json", "w")
+    file.write(json.dumps(sm_data))
+    file.close()
 
 
 def main():
-    print "Welcome to Smart Meter"
+
     conv_matrix = load_sm_setup()
     sm_data = load_sm_data()
-    operation()
+    operation(sm_data)
+
+
 main()
