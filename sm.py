@@ -14,7 +14,7 @@ def load_sm_data():
         with open('sm_data.json') as data_file:
             sm_data = json.load(data_file)
             return sm_data
-    except:
+    except ValueError:
         filex = open('sm_data.json', "w")
         filex.write('{"home":{"water": {}, "gas": {},"electricity":{}}}')
         filex.close()
@@ -33,7 +33,7 @@ def date_input(sentence):
         try:
             datetime.datetime.strptime(date, '%Y-%m-%d')
             return date
-        except:
+        except ValueError:
             print "Invalid input"
             x = date_input("The date should be as 'yyyy-mm-dd'")
             return x
@@ -70,7 +70,7 @@ def add_measurements(sm_data):
             date = date_input(sentence)
             new_measurement = {"home": {utility: {date: {"read": {}}}}}
             while True:
-                read = raw_input('please enter meter read for '+str(utility)+" on "+str(date))
+                read = input('please enter meter read for '+str(utility)+" on " + date)
                 if len(str(read)) == 5:
                     new_measurement["home"][utility][date]["read"] = read
                     save_measurements(new_measurement, utility, sm_data, date)
@@ -94,8 +94,8 @@ def usage_check(sm_data, conv_matrix):
     while True:
         if utility == 'gas' or utility == 'water' or utility == 'electricity':
             n = 0
-            for key in sm_data["home"]["gas"]:
-                if str(sm_data["home"]["gas"][key]["read"]) == '':
+            for key in sm_data["home"][utility]:
+                if str(sm_data["home"][utility][key]["read"]) == '':
                     n = n + 1
             if len(sm_data["home"][utility])-n >= 2:
                 print"saved data for " + utility + " utility are the following:"
