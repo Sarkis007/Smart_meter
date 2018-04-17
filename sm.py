@@ -15,9 +15,9 @@ def load_sm_data():
             sm_data = json.load(data_file)
             return sm_data
     except:
-        file = open('sm_data.json', "w")
-        file.write('{"home":{"water": {}, "gas": {},"electricity":{}}}')
-        file.close()
+        filex = open('sm_data.json', "w")
+        filex.write('{"home":{"water": {}, "gas": {},"electricity":{}}}')
+        filex.close()
         with open('sm_data.json') as data_file:
             sm_data = json.load(data_file)
             return sm_data
@@ -53,15 +53,15 @@ def operation(sm_data, conv_matrix):
         elif x == '3':
             print "Thank you"
             print "Have a nice day"
-            break
+            exit()
+
         else:
             print "invalid input, please enter 1 or 2 or 3"
 
 
 def add_measurements(sm_data):
-    print "please select the utility measurement you want to add"
+    utility = raw_input("Please select the utility measurement you want to add 'gas' 'water' or 'electricity'")
     while True:
-        utility = raw_input("'gas' 'water' or 'electricity'")
         if utility == 'gas' or utility == 'water' or utility == 'electricity':
             sentence = "please insert the date as 'yyyy-mm-dd' or just type 'today' "
             date = date_input(sentence)
@@ -80,21 +80,23 @@ def add_measurements(sm_data):
                 except:
                     print "the input should be a number, please try again"
         else:
-            print "please select 'gas' 'water' or 'electricity'"
+            utility = raw_input("Invalid input, please enter 'gas' 'water' or 'electricity'")
+
 
 def utility_unit(utility):
     if utility == 'gas' or utility == 'water':
-        return (u'm\u00b3')
-    elif utility =='electricity':
+        return u'm\u00b3'
+    elif utility == 'electricity':
         return 'Kwh'
 
+
 def usage_check(sm_data, conv_matrix):
-    print "please select the utility you want to check"
+    utility = raw_input("please select the utility you want to check 'gas' 'water' or 'electricity'")
     while True:
-        utility = raw_input("'gas' 'water' or 'electricity'")
         if utility == 'gas' or utility == 'water' or utility == 'electricity':
-            print"saved data for " + utility + " utility are the following:"
+
             if len(sm_data["home"][utility]) >= 2:
+                print"saved data for " + utility + " utility are the following:"
                 n = 1
                 for key in sm_data["home"][utility]:
                     print str(n) + '- on ' + str(key) + '  -  ' + str(sm_data["home"][utility][key]["read"]) + ' ' +\
@@ -136,8 +138,17 @@ def usage_check(sm_data, conv_matrix):
                             print "Approximately", int((30*cost)/used_days), "Drams per month"
                         else:
                             print "Approximately", int(cost/used_days), "Drams per Day"
-                        print "if you want to do other operations select one or exit"
-                        operation(sm_data, conv_matrix)
+                        x = raw_input("Do you want to do other operations enter 'y' for yes and 'n' to exit")
+                        while True:
+                            if x == 'y':
+                                print "please select one of the following"
+                                operation(sm_data, conv_matrix)
+                            elif x == 'n':
+                                print "Thank you"
+                                print "Have a nice day"
+                                exit()
+                            else:
+                                x = raw_input("Invalid input, please enter 'y' for yes and 'n' to exit")
                     else:
                         print first_date + '  -  ', first_read
                         print second_date + '  -  ', second_read
@@ -150,12 +161,12 @@ def usage_check(sm_data, conv_matrix):
                         print "if you want to do other operations select one or exit"
                         operation(sm_data, conv_matrix)
             else:
-                print "There are " + str(len(sm_data["home"][utility])) + " reads" + " for " + utility + " utility"
-                print "There should be at least two reads"
+                print "There are " + str(len(sm_data["home"][utility])) + " reading" + " for " + utility + " utility"
+                print "There should be at least two readings"
                 print "Please select other operation"
                 operation(sm_data, conv_matrix)
         else:
-            print "Invalid input, please select"
+            utility = raw_input("Invalid input, please enter 'gas' 'water' or 'electricity'")
 
 
 def save_measurements(new_measurement, utility, sm_data, date):
