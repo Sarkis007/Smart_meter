@@ -23,9 +23,9 @@ def load_sm_data():
             return sm_data
 
 
-def date_input():
+def date_input(sentence):
     now = datetime.datetime.now()
-    date = raw_input("please insert the date as 'yyyy-mm-dd' or just type 'today' ")
+    date = raw_input(sentence)
     if date == 'today':
         date = str(now.strftime("%Y-%m-%d"))
         return date
@@ -34,23 +34,22 @@ def date_input():
             datetime.datetime.strptime(date, '%Y-%m-%d')
             return date
         except:
-            x = date_input()
+            print "Invalid input"
+            x = date_input("The date should be as 'yyyy-mm-dd'")
             return x
 
 
-def operation(sm_data):
-    print "Welcome to Smart Meter"
-    print "please select one of the following operations"
+def operation(sm_data, conv_matrix):
     while True:
-        print "1- add a new measurement"
-        print "2- check your usage"
-        print "3- exit"
+        print "1- Add a new measurement"
+        print "2- Check your usage"
+        print "3- Exit"
         x = raw_input()
         if x == '1':
             add_measurements(sm_data)
             print "please choose other operation or enter 3 to exit"
         elif x == '2':
-            print ""
+            usage_check(sm_data, conv_matrix)
         elif x == '3':
             print "Thank you"
             print "Have a nice day"
@@ -64,7 +63,8 @@ def add_measurements(sm_data):
     while True:
         utility = raw_input("'gas' 'water' or 'electricity'")
         if utility == 'gas' or utility == 'water' or utility == 'electricity':
-            date = date_input()
+            sentence = "please insert the date as 'yyyy-mm-dd' or just type 'today' "
+            date = date_input(sentence)
             new_measurement = {"home": {utility: {date: {"read": {}}}}}
             while True:
                 try:
@@ -72,7 +72,6 @@ def add_measurements(sm_data):
                         read = input('please enter meter read for '+str(utility)+" on "+str(date))
                         if len(str(read)) == 5:
                             new_measurement["home"][utility][date]["read"] = read
-                            print new_measurement
                             save_measurements(new_measurement, utility, sm_data, date)
                             print "measurement added successfully"
                             return utility, date, read
@@ -83,19 +82,96 @@ def add_measurements(sm_data):
         else:
             print "please select 'gas' 'water' or 'electricity'"
 
+def utility_unit(utility):
+    if utility == 'gas' or utility == 'water':
+        return (u'm\u00b3')
+    elif utility =='electricity':
+        return 'Kwh'
+
+def usage_check(sm_data, conv_matrix):
+    print "please select the utility you want to check"
+    while True:
+        utility = raw_input("'gas' 'water' or 'electricity'")
+        if utility == 'gas' or utility == 'water' or utility == 'electricity':
+            print"saved data for " + utility + " utility are the following:"
+            if len(sm_data["home"][utility]) >= 2:
+                n = 1
+                for key in sm_data["home"][utility]:
+                    print str(n) + '- on ' + str(key) + '  -  ' + str(sm_data["home"][utility][key]["read"]) + ' ' +\
+                          utility_unit(utility)
+                    n = n+1
+                print "Enter any two dates to calculate the usage"
+
+                while True:
+                    first_date = date_input("please enter the first date you want to add as 'yyyy-mm-dd'")
+                    while True:
+                        if first_date in sm_data["home"][utility]:
+                            break
+                        else:
+                            first_date = date_input("The date you entered is not in the data," 
+                                                    " please enter the date again")
+                    second_date = date_input("please enter the second date you want to add as 'yyyy-mm-dd'")
+                    while True:
+                        if second_date in sm_data["home"][utility]:
+                            break
+                        else:
+                            second_date = date_input("The date you entered is not in the data,"
+                                                     " please enter the date again")
+                    first_read = sm_data["home"][utility][first_date]["read"]
+                    second_read = sm_data["home"][utility][second_date]["read"]
+                    if first_date > second_date and first_read > second_read or first_date < second_date and first_read\
+                            < second_read:
+                        used_amount = abs(int(first_read - second_read))
+                        from datetime import datetime
+                        date_format = "%Y-%m-%d"
+                        a = datetime.strptime(first_date, date_format)
+                        b = datetime.strptime(second_date, date_format)
+                        delta = abs(b - a)
+                        used_days = delta.days
+                        cost = used_amount*conv_matrix[utility]
+                        print "The amount of", utility, "used in", used_days, "days is",\
+                            used_amount, utility_unit(utility)
+                        print "which's cost for", used_days, "days is", cost, "Drams"
+                        if used_days > 30:
+                            print "Approximately", int((30*cost)/used_days), "Drams per month"
+                        else:
+                            print "Approximately", int(cost/used_days), "Drams per Day"
+                        print "if you want to do other operations select one or exit"
+                        operation(sm_data, conv_matrix)
+                    else:
+                        print first_date + '  -  ', first_read
+                        print second_date + '  -  ', second_read
+                        if first_date > second_date:
+                            print "the usage for " + second_date + " is bigger than the usage of " + first_date
+                            print "which makes no sense, please check the readings for the dates"
+                        if first_date < second_date:
+                            print "the usage for " + first_date + " is bigger than the usage of " + second_date
+                            print "which makes no sense, please check the readings for the dates"
+                        print "if you want to do other operations select one or exit"
+                        operation(sm_data, conv_matrix)
+            else:
+                print "There are " + str(len(sm_data["home"][utility])) + " reads" + " for " + utility + " utility"
+                print "There should be at least two reads"
+                print "Please select other operation"
+                operation(sm_data, conv_matrix)
+        else:
+            print "Invalid input, please select"
+
 
 def save_measurements(new_measurement, utility, sm_data, date):
     sm_data["home"][utility][date] = new_measurement["home"][utility][date]
-    file = open("sm_data.json", "w")
-    file.write(json.dumps(sm_data))
-    file.close()
+    filex = open("sm_data.json", "w")
+    filex.write(json.dumps(sm_data))
+    filex.close()
 
 
 def main():
 
     conv_matrix = load_sm_setup()
     sm_data = load_sm_data()
-    operation(sm_data)
+    print "Welcome to Smart Meter"
+    print "Please select one of the following operations"
+    operation(sm_data, conv_matrix)
 
 
 main()
