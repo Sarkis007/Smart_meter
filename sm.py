@@ -43,14 +43,17 @@ def operation(sm_data, conv_matrix):
     while True:
         print "1- Add a new measurement"
         print "2- Check your usage"
-        print "3- Exit"
+        print "3- Edit the data"
+        print "4- Exit"
         x = raw_input()
         if x == '1':
             add_measurements(sm_data)
-            print "please choose other operation or enter 3 to exit"
+            print "please choose other operation or enter 4 to exit"
         elif x == '2':
             usage_check(sm_data, conv_matrix)
         elif x == '3':
+            edit_data(sm_data, conv_matrix)
+        elif x == '4':
             print "Thank you"
             print "Have a nice day"
             exit()
@@ -67,18 +70,14 @@ def add_measurements(sm_data):
             date = date_input(sentence)
             new_measurement = {"home": {utility: {date: {"read": {}}}}}
             while True:
-                try:
-                    while True:
-                        read = input('please enter meter read for '+str(utility)+" on "+str(date))
-                        if len(str(read)) == 5:
-                            new_measurement["home"][utility][date]["read"] = read
-                            save_measurements(new_measurement, utility, sm_data, date)
-                            print "measurement added successfully"
-                            return utility, date, read
-                        else:
-                            print "the length should be 5 numbers, please try again"
-                except:
-                    print "the input should be a number, please try again"
+                read = raw_input('please enter meter read for '+str(utility)+" on "+str(date))
+                if len(str(read)) == 5:
+                    new_measurement["home"][utility][date]["read"] = read
+                    save_measurements(new_measurement, utility, sm_data, date)
+                    print "measurement added successfully"
+                    return utility, date, read
+                else:
+                    print "the length should be 5 numbers, please try again"
         else:
             utility = raw_input("Invalid input, please enter 'gas' 'water' or 'electricity'")
 
@@ -94,16 +93,19 @@ def usage_check(sm_data, conv_matrix):
     utility = raw_input("please select the utility you want to check 'gas' 'water' or 'electricity'")
     while True:
         if utility == 'gas' or utility == 'water' or utility == 'electricity':
-
-            if len(sm_data["home"][utility]) >= 2:
+            n = 0
+            for key in sm_data["home"]["gas"]:
+                if str(sm_data["home"]["gas"][key]["read"]) == '':
+                    n = n + 1
+            if len(sm_data["home"][utility])-n >= 2:
                 print"saved data for " + utility + " utility are the following:"
                 n = 1
                 for key in sm_data["home"][utility]:
-                    print str(n) + '- on ' + str(key) + '  -  ' + str(sm_data["home"][utility][key]["read"]) + ' ' +\
-                          utility_unit(utility)
-                    n = n+1
+                    if str(sm_data["home"][utility][key]["read"]) != '':
+                        print str(n) + '- on ' + str(key) + '  -  ' +\
+                              str(sm_data["home"][utility][key]["read"]) + ' ' + utility_unit(utility)
+                        n = n + 1
                 print "Enter any two dates to calculate the usage"
-
                 while True:
                     first_date = date_input("please enter the first date you want to add as 'yyyy-mm-dd'")
                     while True:
@@ -161,9 +163,54 @@ def usage_check(sm_data, conv_matrix):
                         print "if you want to do other operations select one or exit"
                         operation(sm_data, conv_matrix)
             else:
-                print "There are " + str(len(sm_data["home"][utility])) + " reading" + " for " + utility + " utility"
+                print "There are " + str(len(sm_data["home"][utility])-n) + " reading" + " for " + utility + " utility"
                 print "There should be at least two readings"
                 print "Please select other operation"
+                operation(sm_data, conv_matrix)
+        else:
+            utility = raw_input("Invalid input, please enter 'gas' 'water' or 'electricity'")
+
+
+def edit_data(sm_data, conv_matrix):
+    utility = raw_input("Please select the utility field you want to edit 'gas' 'water' or 'electricity'")
+    while True:
+        if utility == 'gas' or utility == 'water' or utility == 'electricity':
+            if len(sm_data["home"][utility]) >= 1:
+                print"saved data for " + utility + " utility are the following:"
+                n = 1
+                for key in sm_data["home"][utility]:
+                    if str(sm_data["home"][utility][key]["read"]) != '':
+                        print str(n) + '- on ' + str(key) + '  -  ' + str(sm_data["home"][utility][key]["read"]) + \
+                              ' ' + utility_unit(utility)
+                        n = n + 1
+                date_select = date_input("please select one of the dates above")
+                while True:
+                    if date_select in sm_data["home"][utility]:
+                        break
+                    else:
+                        date_select = date_input("The date you entered is not in the data, please enter the date again")
+                edit_or_delete = raw_input("Do you want to delete it or edit it ?")
+                while True:
+                    if edit_or_delete == 'edit':
+                        read = raw_input('please enter the new meter read for ' + str(utility)
+                                         + " on " + str(date_select))
+                        while True:
+                            if len(read) == 5:
+                                sm_data["home"][utility][date_select]["read"] = read
+                                save_measurements(sm_data, utility, sm_data, date_select)
+                                print "measurement edited successfully"
+                                operation(sm_data, conv_matrix)
+                            else:
+                                read = raw_input("your input should be a number of 5 digits")
+                    elif edit_or_delete == 'delete':
+                        sm_data["home"][utility][date_select] = {"read": ""}
+                        save_measurements(sm_data, utility, sm_data, date_select)
+                        print "measurement deleted successfully"
+                        operation(sm_data, conv_matrix)
+                    else:
+                        edit_or_delete = raw_input("Invalid input, please enter 'edit' or 'delete'")
+            else:
+                print "There are no readings for", utility, "utility to edit"
                 operation(sm_data, conv_matrix)
         else:
             utility = raw_input("Invalid input, please enter 'gas' 'water' or 'electricity'")
