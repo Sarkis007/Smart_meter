@@ -8,7 +8,7 @@ def load_sm_setup():
             sm_setup = json.load(data_file)
             conv_matrix = sm_setup["sm_setup"]["conv_matrix"]
             return conv_matrix
-    except ValueError:
+    except (IOError, ValueError):
         filex = open('sm_setup.json', "w")
         filex.write('{ "sm_setup": { "conv_matrix": { "water": 194.3, "gas": 72, "electricity": 21.32 } } }')
         filex.close()
@@ -17,12 +17,13 @@ def load_sm_setup():
             conv_matrix = sm_setup["sm_setup"]["conv_matrix"]
             return conv_matrix
 
+
 def load_sm_data():
     try:
         with open('sm_data.json') as data_file:
             sm_data = json.load(data_file)
             return sm_data
-    except ValueError:
+    except (IOError, ValueError):
         filex = open('sm_data.json', "w")
         filex.write('{"home":{"water": {}, "gas": {},"electricity":{}}, "work":{"water": {}, "gas": {},'
                     '"electricity":{}}, "other":{"water": {}, "gas": {},"electricity":{}}}')
