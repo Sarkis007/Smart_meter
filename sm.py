@@ -70,14 +70,17 @@ def add_measurements(sm_data):
             date = date_input(sentence)
             new_measurement = {"home": {utility: {date: {"read": {}}}}}
             while True:
-                read = input('please enter meter read for '+str(utility)+" on " + date)
-                if len(str(read)) == 5:
-                    new_measurement["home"][utility][date]["read"] = read
-                    save_measurements(new_measurement, utility, sm_data, date)
-                    print "measurement added successfully"
-                    return utility, date, read
-                else:
-                    print "the length should be 5 numbers, please try again"
+                try:
+                    read = input('please enter meter read for '+str(utility)+" on " + date)
+                    if len(str(read)) == 5:
+                        new_measurement["home"][utility][date]["read"] = read
+                        save_measurements(new_measurement, utility, sm_data, date)
+                        print "measurement added successfully"
+                        return utility, date, read
+                    else:
+                        print "the length should be 5 numbers, please try again"
+                except NameError:
+                    print "Invalid input, your input should be only numbers"
         else:
             utility = raw_input("Invalid input, please enter 'gas' 'water' or 'electricity'")
 
@@ -192,16 +195,19 @@ def edit_data(sm_data, conv_matrix):
                 edit_or_delete = raw_input("Do you want to delete it or edit it ?")
                 while True:
                     if edit_or_delete == 'edit':
-                        read = raw_input('please enter the new meter read for ' + str(utility)
-                                         + " on " + str(date_select))
                         while True:
-                            if len(read) == 5:
-                                sm_data["home"][utility][date_select]["read"] = read
-                                save_measurements(sm_data, utility, sm_data, date_select)
-                                print "measurement edited successfully"
-                                operation(sm_data, conv_matrix)
-                            else:
-                                read = raw_input("your input should be a number of 5 digits")
+                            try:
+                                read = input(
+                                    'please enter the new meter read for ' + str(utility) + " on " + str(date_select))
+                                if len(str(read)) == 5:
+                                    sm_data["home"][utility][date_select]["read"] = read
+                                    save_measurements(sm_data, utility, sm_data, date_select)
+                                    print "measurement edited successfully"
+                                    operation(sm_data, conv_matrix)
+                                else:
+                                    print ("Invalid input, your input should be a number of 5 digits")
+                            except NameError:
+                                print "Invalid input, your input should be only numbers"
                     elif edit_or_delete == 'delete':
                         sm_data["home"][utility][date_select] = {"read": ""}
                         save_measurements(sm_data, utility, sm_data, date_select)
