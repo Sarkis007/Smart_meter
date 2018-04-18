@@ -25,8 +25,8 @@ def load_sm_data():
             return sm_data
     except (IOError, ValueError):
         filex = open('sm_data.json', "w")
-        filex.write('{"home":{"water": {}, "gas": {},"electricity":{}}, "work":{"water": {}, "gas": {},'
-                    '"electricity":{}}, "other":{"water": {}, "gas": {},"electricity":{}}}')
+        filex.write('{"Home":{"water": {}, "gas": {},"electricity":{}}, "Work":{"water": {}, "gas": {},'
+                    '"electricity":{}}, "Other":{"water": {}, "gas": {},"electricity":{}}}')
         filex.close()
         with open('sm_data.json') as data_file:
             sm_data = json.load(data_file)
@@ -60,7 +60,7 @@ def place_info(sm_data):
             place = 'Home'
             return place
         elif place == '2':
-            place = 'Work'
+            place = 'work'
             return place
         elif place == '3':
             place = 'Other'
