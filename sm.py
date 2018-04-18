@@ -3,11 +3,19 @@ import datetime
 
 
 def load_sm_setup():
-    with open('sm_setup.json') as data_file:
-        sm_setup = json.load(data_file)
-        conv_matrix = sm_setup["sm_setup"]["conv_matrix"]
-        return conv_matrix
-
+    try:
+        with open('sm_setup.json') as data_file:
+            sm_setup = json.load(data_file)
+            conv_matrix = sm_setup["sm_setup"]["conv_matrix"]
+            return conv_matrix
+    except ValueError:
+        filex = open('sm_setup.json', "w")
+        filex.write('{ "sm_setup": { "conv_matrix": { "water": 194.3, "gas": 72, "electricity": 21.32 } } }')
+        filex.close()
+        with open('sm_setup.json') as data_file:
+            sm_setup = json.load(data_file)
+            conv_matrix = sm_setup["sm_setup"]["conv_matrix"]
+            return conv_matrix
 
 def load_sm_data():
     try:
