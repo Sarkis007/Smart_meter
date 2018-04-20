@@ -60,7 +60,7 @@ def place_info(sm_data):
             place = 'Home'
             return place
         elif place == '2':
-            place = 'work'
+            place = 'Work'
             return place
         elif place == '3':
             place = 'Other'
@@ -127,13 +127,13 @@ def add_measurements(sm_data, place, utility, conv_matrix):
         while True:
             try:
                 read = input('please enter meter read for '+str(utility)+" on " + date)
-                if len(str(read)) == 5:
+                if len(str(read)) <= 5:
                     new_measurement[place][utility][date]["read"] = read
                     save_measurements(new_measurement, utility, sm_data, date, place)
                     print "measurement added successfully"
                     return utility, date, read
                 else:
-                    print "the length should be 5 numbers, please try again"
+                    print "the length should not be more than 5 numbers, please try again"
             except NameError:
                 print "Invalid input, your input should be only numbers"
     else:
@@ -251,13 +251,13 @@ def edit_data(sm_data, conv_matrix, place, utility):
                     try:
                         read = input(
                             'please enter the new meter read for ' + str(utility) + " on " + str(date_select))
-                        if len(str(read)) == 5:
+                        if len(str(read)) <= 5:
                             sm_data[place][utility][date_select]["read"] = read
                             save_measurements(sm_data, utility, sm_data, date_select, place)
                             print "measurement edited successfully"
                             operation(sm_data, conv_matrix)
                         else:
-                            print ("Invalid input, your input should be a number of 5 digits")
+                            print ("Invalid input, your input should not be more than 5 digits")
                     except NameError:
                         print "Invalid input, your input should be only numbers"
             elif edit_or_delete == 'delete':
