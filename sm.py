@@ -123,7 +123,7 @@ def operation(sm_data, conv_matrix):
 def add_measurements(sm_data, place, utility, conv_matrix):
     date = date_input("please insert the date as yyyy-mm-dd or just type 'today' ")
     new_measurement = {place: {utility: {date: {"read": {}}}}}
-    if date not in sm_data[place][utility] or sm_data[place][utility][date]["read"] == "":
+    if date not in sm_data[place][utility]:
         while True:
             try:
                 read = input('please enter meter read for '+str(utility)+" on " + date)
@@ -149,18 +149,13 @@ def utility_unit(utility):
 
 
 def usage_check(sm_data, conv_matrix, place, utility):
-    n = 0
-    for key in sm_data[place][utility]:
-        if str(sm_data[place][utility][key]["read"]) == '':
-            n = n + 1
-    if len(sm_data[place][utility])-n >= 2:
+    if len(sm_data[place][utility]) >= 2:
         print"saved data for " + utility + " utility are the following:"
         n = 1
         for key in sm_data[place][utility]:
-            if str(sm_data[place][utility][key]["read"]) != '':
-                print str(n) + '- on ' + str(key) + '  -  ' +\
-                      str(sm_data[place][utility][key]["read"]) + ' ' + utility_unit(utility)
-                n = n + 1
+            print str(n) + '- on ' + str(key) + '  -  ' +\
+                    str(sm_data[place][utility][key]["read"]) + ' ' + utility_unit(utility)
+            n = n + 1
         print "Enter any two dates to calculate the usage"
         while True:
             first_date = date_input("please enter the first date you want to add as 'yyyy-mm-dd'")
@@ -219,34 +214,29 @@ def usage_check(sm_data, conv_matrix, place, utility):
                 print "if you want to do other operations select one or exit"
                 operation(sm_data, conv_matrix)
     else:
-        print "There are " + str(len(sm_data[place][utility])-n) + " reading" + " for " + utility + " utility"
+        print "There are " + str(len(sm_data[place][utility])) + " reading" + " for " + utility + " utility"
         print "There should be at least two readings"
         print "Please select other operation"
         operation(sm_data, conv_matrix)
 
 
 def edit_data(sm_data, conv_matrix, place, utility):
-    n = 0
-    for key in sm_data[place][utility]:
-        if str(sm_data[place][utility][key]["read"]) == '':
-            n = n + 1
-    if len(sm_data[place][utility])-n >= 1:
+    if len(sm_data[place][utility]) >= 1:
         print"saved data for " + utility + " utility are the following:"
         n = 1
         for key in sm_data[place][utility]:
-            if str(sm_data[place][utility][key]["read"]) != '':
-                print str(n) + '- on ' + str(key) + '  -  ' + str(sm_data[place][utility][key]["read"]) + \
-                      ' ' + utility_unit(utility)
-                n = n + 1
-        date_select = date_input("please select one of the dates above")
+            print str(n) + '- on ' + str(key) + '  -  ' + str(sm_data[place][utility][key]["read"]) + \
+                    ' ' + utility_unit(utility)
+            n = n + 1
+        date_select = date_input("please select one of the dates above to edit")
         while True:
             if date_select in sm_data[place][utility]:
                 break
             else:
                 date_select = date_input("The date you entered is not in the data, please enter the date again")
-        edit_or_delete = raw_input("Do you want to delete it or edit it ?")
+        edit_or_delete = raw_input("Do you want to delete it or change it ?")
         while True:
-            if edit_or_delete == 'edit':
+            if edit_or_delete == 'change':
                 while True:
                     try:
                         read = input(
@@ -254,14 +244,14 @@ def edit_data(sm_data, conv_matrix, place, utility):
                         if len(str(read)) <= 5:
                             sm_data[place][utility][date_select]["read"] = read
                             save_measurements(sm_data, utility, sm_data, date_select, place)
-                            print "measurement edited successfully"
+                            print "measurement changed successfully"
                             operation(sm_data, conv_matrix)
                         else:
                             print ("Invalid input, your input should not be more than 5 digits")
                     except NameError:
                         print "Invalid input, your input should be only numbers"
             elif edit_or_delete == 'delete':
-                sm_data[place][utility][date_select] = {"read": ""}
+                del sm_data[place][utility][date_select]
                 save_measurements(sm_data, utility, sm_data, date_select, place)
                 print "measurement deleted successfully"
                 operation(sm_data, conv_matrix)
@@ -273,7 +263,10 @@ def edit_data(sm_data, conv_matrix, place, utility):
 
 
 def save_measurements(new_measurement, utility, sm_data, date, place):
-    sm_data[place][utility][date] = new_measurement[place][utility][date]
+    try:
+        sm_data[place][utility][date] = new_measurement[place][utility][date]
+    except KeyError:
+        sm_data[place][utility] = new_measurement[place][utility]
     filex = open("sm_data.json", "w")
     filex.write(json.dumps(sm_data))
     filex.close()
