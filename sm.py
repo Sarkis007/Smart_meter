@@ -6,16 +6,16 @@ def load_sm_setup():
     try:
         with open('sm_setup.json') as data_file:
             sm_setup = json.load(data_file)
-            conv_matrix = sm_setup["sm_setup"]["conv_matrix"]
-            return conv_matrix
+            utility_prices = sm_setup["sm_setup"]["utility_prices"]
+            return utility_prices
     except (IOError, ValueError):
         filex = open('sm_setup.json', "w")
-        filex.write('{ "sm_setup": { "conv_matrix": { "water": 194.3, "gas": 72, "electricity": 21.32 } } }')
+        filex.write('{ "sm_setup": { "utility_prices": { "water": 194.3, "gas": 72, "electricity": 21.32 } } }')
         filex.close()
         with open('sm_setup.json') as data_file:
             sm_setup = json.load(data_file)
-            conv_matrix = sm_setup["sm_setup"]["conv_matrix"]
-            return conv_matrix
+            utility_prices = sm_setup["sm_setup"]["utility_prices"]
+            return utility_prices
 
 
 def load_sm_data():
@@ -89,7 +89,7 @@ def utility_info():
             utility = raw_input("please enter 1 or 2 or 3")
 
 
-def operation(sm_data, conv_matrix):
+def start_sm(sm_data, utility_prices):
     while True:
         print "1- Add a new measurement"
         print "2- Check your usage"
@@ -100,18 +100,18 @@ def operation(sm_data, conv_matrix):
             print "Please select for which place you want to add a new measurement"
             place = place_info(sm_data)
             utility = utility_info()
-            add_measurements(sm_data, place, utility, conv_matrix)
+            add_measurements(sm_data, place, utility, utility_prices)
             print "Please choose other operation or enter 4 to exit"
         elif x == '2':
             print "Please select for which place you want to check your usage"
             place = place_info(sm_data)
             utility = utility_info()
-            usage_check(sm_data, conv_matrix, place, utility)
+            usage_check(sm_data, utility_prices, place, utility)
         elif x == '3':
             print "please select for which place you want to edit the data"
             place = place_info(sm_data)
             utility = utility_info()
-            edit_data(sm_data, conv_matrix, place, utility)
+            edit_data(sm_data, utility_prices, place, utility)
         elif x == '4':
             print "Thank you"
             print "Have a nice day"
@@ -120,7 +120,7 @@ def operation(sm_data, conv_matrix):
             print "invalid input, please enter 1 or 2 or 3"
 
 
-def add_measurements(sm_data, place, utility, conv_matrix):
+def add_measurements(sm_data, place, utility, utility_prices):
     date = date_input("please insert the date as yyyy-mm-dd or just type 'today' ")
     new_measurement = {place: {utility: {date: {"read": {}}}}}
     if date not in sm_data[place][utility]:
@@ -138,7 +138,7 @@ def add_measurements(sm_data, place, utility, conv_matrix):
                 print "Invalid input, your input should be only numbers"
     else:
         print "The date you entered already exists if you want to edit it please enter 3 or choose other operation"
-        operation(sm_data, conv_matrix)
+        start_sm(sm_data, utility_prices)
 
 
 def utility_unit(utility):
@@ -148,7 +148,7 @@ def utility_unit(utility):
         return 'Kwh'
 
 
-def usage_check(sm_data, conv_matrix, place, utility):
+def usage_check(sm_data, utility_prices, place, utility):
     if len(sm_data[place][utility]) >= 2:
         print"saved data for " + utility + " utility are the following:"
         n = 1
@@ -183,7 +183,7 @@ def usage_check(sm_data, conv_matrix, place, utility):
                 b = datetime.strptime(second_date, date_format)
                 delta = abs(b - a)
                 used_days = delta.days
-                cost = used_amount*conv_matrix[utility]
+                cost = used_amount*utility_prices[utility]
                 print "The amount of", utility, "used in", used_days, "days is",\
                     used_amount, utility_unit(utility)
                 print "which's cost for", used_days, "days is", cost, "Drams"
@@ -195,7 +195,7 @@ def usage_check(sm_data, conv_matrix, place, utility):
                 while True:
                     if x == 'y':
                         print "please select one of the following"
-                        operation(sm_data, conv_matrix)
+                        start_sm(sm_data, utility_prices)
                     elif x == 'n':
                         print "Thank you"
                         print "Have a nice day"
@@ -212,15 +212,15 @@ def usage_check(sm_data, conv_matrix, place, utility):
                     print "the usage for " + first_date + " is bigger than the usage of " + second_date
                     print "which makes no sense, please check the readings for the dates"
                 print "if you want to do other operations select one or exit"
-                operation(sm_data, conv_matrix)
+                start_sm(sm_data, utility_prices)
     else:
         print "There are " + str(len(sm_data[place][utility])) + " reading" + " for " + utility + " utility"
         print "There should be at least two readings"
         print "Please select other operation"
-        operation(sm_data, conv_matrix)
+        start_sm(sm_data, utility_prices)
 
 
-def edit_data(sm_data, conv_matrix, place, utility):
+def edit_data(sm_data, utility_prices, place, utility):
     if len(sm_data[place][utility]) >= 1:
         print"saved data for " + utility + " utility are the following:"
         n = 1
@@ -245,7 +245,7 @@ def edit_data(sm_data, conv_matrix, place, utility):
                             sm_data[place][utility][date_select]["read"] = read
                             save_measurements(sm_data, utility, sm_data, date_select, place)
                             print "measurement changed successfully"
-                            operation(sm_data, conv_matrix)
+                            start_sm(sm_data, utility_prices)
                         else:
                             print ("Invalid input, your input should not be more than 5 digits")
                     except NameError:
@@ -254,12 +254,12 @@ def edit_data(sm_data, conv_matrix, place, utility):
                 del sm_data[place][utility][date_select]
                 save_measurements(sm_data, utility, sm_data, date_select, place)
                 print "measurement deleted successfully"
-                operation(sm_data, conv_matrix)
+                start_sm(sm_data, utility_prices)
             else:
                 edit_or_delete = raw_input("Invalid input, please enter 'edit' or 'delete'")
     else:
         print "There are no readings for", utility, "utility to edit"
-        operation(sm_data, conv_matrix)
+        start_sm(sm_data, utility_prices)
 
 
 def save_measurements(new_measurement, utility, sm_data, date, place):
@@ -274,11 +274,11 @@ def save_measurements(new_measurement, utility, sm_data, date, place):
 
 def main():
 
-    conv_matrix = load_sm_setup()
+    utility_prices = load_sm_setup()
     sm_data = load_sm_data()
     print "Welcome to Smart Meter"
     print "Please select one of the following operations"
-    operation(sm_data, conv_matrix)
+    start_sm(sm_data, utility_prices)
 
 
 main()

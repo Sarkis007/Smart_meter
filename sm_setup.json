@@ -1,9 +1,1 @@
-{
-	"sm_setup": {
-		"conv_matrix": {
-			"water": 194.3,
-			"gas": 72,
-			"electricity": 21.32
-		}
-	}
-}
+{ "sm_setup": { "utility_prices": { "water": 194.3, "gas": 72, "electricity": 21.32 } } }
