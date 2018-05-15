@@ -45,7 +45,7 @@ def date_input(sentence):
             return date
         except ValueError:
             print "Invalid input"
-            x = date_input("The date should be as 'yyyy-mm-dd'")
+            x = date_input("The date should be as 'year-mm-dd'")
             return x
 
 
@@ -113,7 +113,7 @@ def start_sm(sm_data, utility_prices):
             utility = utility_info()
             edit_data(sm_data, utility_prices, place, utility)
         elif x == '4':
-            print "Thank you"
+            print "Thank you sir"
             print "Have a nice day"
             exit()
         else:
@@ -121,7 +121,7 @@ def start_sm(sm_data, utility_prices):
 
 
 def add_measurements(sm_data, place, utility, utility_prices):
-    date = date_input("please insert the date as yyyy-mm-dd or just type 'today' ")
+    date = date_input("please insert the date as year-mm-dd or just type 'today' ")
     new_measurement = {place: {utility: {date: {"read": {}}}}}
     if date not in sm_data[place][utility]:
         while True:
@@ -158,14 +158,14 @@ def usage_check(sm_data, utility_prices, place, utility):
             n = n + 1
         print "Enter any two dates to calculate the usage"
         while True:
-            first_date = date_input("please enter the first date you want to add as 'yyyy-mm-dd'")
+            first_date = date_input("please enter the first date you want to add as 'year-mm-dd'")
             while True:
                 if first_date in sm_data[place][utility]:
                     break
                 else:
                     first_date = date_input("The date you entered is not in the data," 
                                             " please enter the date again")
-            second_date = date_input("please enter the second date you want to add as 'yyyy-mm-dd'")
+            second_date = date_input("please enter the second date you want to add as 'year-mm-dd'")
             while True:
                 if second_date in sm_data[place][utility]:
                     break
@@ -233,7 +233,7 @@ def edit_data(sm_data, utility_prices, place, utility):
             if date_select in sm_data[place][utility]:
                 break
             else:
-                date_select = date_input("The date you entered is not in the data, please enter the date again")
+                date_select = date_input("The date you entered is not in the data, please enter other date ")
         edit_or_delete = raw_input("Do you want to delete it or change it ?")
         while True:
             if edit_or_delete == 'change':
